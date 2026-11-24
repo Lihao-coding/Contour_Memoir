@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { asset } from "./assets";
 
-const repository = "https://github.com/Lihao-coding/shanxingji";
+const repositoryPath = "Lihao-coding/Contour_Memoir";
+const repository = `https://github.com/${repositoryPath}`;
 
 export function GitHubLink() {
   const [stars, setStars] = useState<number | null>(null);
@@ -9,7 +10,7 @@ export function GitHubLink() {
   useEffect(() => {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 5000);
-    fetch("https://api.github.com/repos/Lihao-coding/shanxingji", {
+    fetch(`https://api.github.com/repos/${repositoryPath}`, {
       signal: controller.signal,
       credentials: "omit",
       referrerPolicy: "no-referrer",
