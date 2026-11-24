@@ -12,3 +12,5 @@
 | 自制人物模型、材质贴图和简化路线 | 项目演示素材，权利由各权利人保留。README 的沙盘对照截图含上述地形与航片。 |
 
 > produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved
+
+页头 GitHub 图标来自 [GitHub Octicons](https://github.com/primer/octicons/blob/main/icons/mark-github-16.svg)，© 2026 GitHub Inc.，采用 [MIT 许可证](https://github.com/primer/octicons/blob/main/LICENSE)，版权与许可原文随图标保留。

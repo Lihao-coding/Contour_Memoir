@@ -12,6 +12,7 @@ import FieldMarker, { FocusField } from "./field/FieldMarker";
 import OfflinePack from "./field/OfflinePack";
 import { nearestRoute, onTerrain } from "./field/position";
 import { useLocation } from "./field/useLocation";
+import { GitHubLink, ProjectFooter, SupportDevelopment } from "./ProjectLinks";
 import { importProject, readTrailFile, sceneData, type TrailProject } from "./project/import";
 import HeightmapTerrain from "./terrain/HeightmapTerrain";
 import { sampleHeight } from "./terrain/sampleHeight";
@@ -369,11 +370,12 @@ function App() {
     setError("");
   }
 
-  return <main className="shell">
+  return <div className="shell">
     <header className="site-top">
       <div className="wordmark">Contour Memoir <span>山行纪</span></div>
       <div className="header-actions">
         {selected !== null && demo && <button type="button" onClick={() => showDemo(edition)}>查看示例</button>}
+        <GitHubLink />
         <label className="import-button">
           <input type="file" accept=".gpx,.json,application/gpx+xml,application/json" disabled={loading} onChange={(event) => {
             const file = event.currentTarget.files?.[0];
@@ -384,26 +386,32 @@ function App() {
         </label>
       </div>
     </header>
-    <div className="intro">
-      <div><h1>{project?.title ?? "路线沙盘"}</h1>
-        <p>{selected === null ? studio ? "高清航片、沿途照片与人物回放" : "西贡半岛 · 3D 地形与路线回放"
-          : "本机导入 · GPX / Trail JSON"}</p>
+    <main className="site-content">
+      <div className="intro">
+        <div><h1>{project?.title ?? "路线沙盘"}</h1>
+          <div className="intro-meta">
+            <p>{selected === null ? studio ? "高清航片、沿途照片与人物回放" : "西贡半岛 · 3D 地形与路线回放"
+              : "本机导入 · GPX / Trail JSON"}</p>
+            <SupportDevelopment />
+          </div>
+        </div>
+        {selected === null && <div className="edition-switch" role="group" aria-label="麦理浩径示例版本">
+          <button type="button" aria-pressed={!studio} onClick={() => showDemo("basic")}>基础版</button>
+          <button type="button" aria-pressed={studio} onClick={() => showDemo("studio")}>进阶版</button>
+        </div>}
+        {selected !== null && custom.length > 1 && <label className="segments">路线段
+          <select value={selected} onChange={(event) => setSelected(Number(event.currentTarget.value))}>
+            {custom.map((route, index) => <option key={index} value={index}>{route.title}</option>)}
+          </select>
+        </label>}
       </div>
-      {selected === null && <div className="edition-switch" role="group" aria-label="麦理浩径示例版本">
-        <button type="button" aria-pressed={!studio} onClick={() => showDemo("basic")}>基础版</button>
-        <button type="button" aria-pressed={studio} onClick={() => showDemo("studio")}>进阶版</button>
-      </div>}
-      {selected !== null && custom.length > 1 && <label className="segments">路线段
-        <select value={selected} onChange={(event) => setSelected(Number(event.currentTarget.value))}>
-          {custom.map((route, index) => <option key={index} value={index}>{route.title}</option>)}
-        </select>
-      </label>}
-    </div>
-    {error && <p className="import-error" role="alert">{error}</p>}
-    {project ? <RouteWorkbench key={selected === null ? edition : `${importRevision}-${selected}`}
-      project={project} demo={selected === null} studio={studio} />
-      : <section className="empty" role="status">{demoError ? "示例加载失败，你仍可以导入本机路线。" : "正在读取麦理浩径地形…"}</section>}
-  </main>;
+      {error && <p className="import-error" role="alert">{error}</p>}
+      {project ? <RouteWorkbench key={selected === null ? edition : `${importRevision}-${selected}`}
+        project={project} demo={selected === null} studio={studio} />
+        : <section className="empty" role="status">{demoError ? "示例加载失败，你仍可以导入本机路线。" : "正在读取麦理浩径地形…"}</section>}
+    </main>
+    <ProjectFooter />
+  </div>;
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
