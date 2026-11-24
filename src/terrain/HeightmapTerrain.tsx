@@ -65,7 +65,12 @@ function buildMesh(data: TerrainData, exaggeration: number) {
   return { plane, walls, floor, width, depth };
 }
 
-export default function HeightmapTerrain({ data, exaggeration, detail, trace, light, cinematic, animateWater, coastal, lakeLevel, profileOnly, terrain, children }: {
+export type Orthophoto = {
+  map: Texture;
+  inset?: { map: Texture; bounds: [number, number, number, number] };
+};
+
+export default function HeightmapTerrain({ data, exaggeration, detail, trace, light, cinematic, animateWater, coastal, lakeLevel, profileOnly, orthophoto, terrain, children }: {
   data: TerrainData;
   exaggeration: number;
   detail: Texture | null;
@@ -76,6 +81,7 @@ export default function HeightmapTerrain({ data, exaggeration, detail, trace, li
   coastal: boolean;
   lakeLevel?: number;
   profileOnly: boolean;
+  orthophoto?: Orthophoto | null;
   terrain: RefObject<Group>;
   children?: ReactNode;
 }) {
@@ -114,8 +120,13 @@ export default function HeightmapTerrain({ data, exaggeration, detail, trace, li
     material.uniforms.verticalScale.value = exaggeration;
     material.uniforms.trackMask.value = trace;
     material.uniforms.showTrackMask.value = !!trace;
+    material.uniforms.orthophoto.value = orthophoto?.map ?? null;
+    material.uniforms.hasOrthophoto.value = !!orthophoto;
+    material.uniforms.orthophotoInset.value = orthophoto?.inset?.map ?? null;
+    material.uniforms.hasInset.value = !!orthophoto?.inset;
+    if (orthophoto?.inset) material.uniforms.insetBounds.value = orthophoto.inset.bounds;
     invalidate();
-  }, [material, trace, exaggeration, invalidate]);
+  }, [material, trace, exaggeration, orthophoto, invalidate]);
   useLayoutEffect(() => {
     for (const [name, value] of Object.entries(light)) {
       if (name !== "sky") material.uniforms[name].value = value;

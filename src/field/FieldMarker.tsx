@@ -40,15 +40,15 @@ export default function FieldMarker({ point, accuracy, data, exaggeration, simul
   </>;
 }
 
-export function FocusField({ aim }: { aim: Vector3 | null }) {
+export function FocusField({ aim, distance = 430 }: { aim: Vector3 | null; distance?: number }) {
   const { camera, orbit, moveTo, cancel } = useCameraFlight();
   useEffect(() => {
     if (!aim || !orbit) return;
     const offset = camera.position.clone().sub(orbit.target);
     offset.y = Math.max(offset.y, Math.hypot(offset.x, offset.z) * 1.1);
-    offset.setLength(Math.min(offset.length(), 430));
+    offset.setLength(Math.min(offset.length(), distance));
     moveTo(aim.clone().add(offset), aim, 650);
     return cancel;
-  }, [aim, camera, orbit, moveTo, cancel]);
+  }, [aim, camera, distance, orbit, moveTo, cancel]);
   return null;
 }

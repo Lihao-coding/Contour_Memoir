@@ -89,3 +89,34 @@ button[aria-pressed=true] { background: #394139; border-color: #788474; color: #
   .wordmark span { display: none; }
   .intro p span { display: block; margin-top: 3px; }
 }
+
+.wordmark { font-family: Georgia, "Songti SC", serif; font-size: clamp(1.05rem, 2.35vw, 1.5rem); letter-spacing: -.025em; }
+.wordmark span { letter-spacing: .04em; }
+.edition-switch { display: flex; align-items: center; gap: 3px; flex: none; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: #111411; }
+.edition-switch button { white-space: nowrap; border-color: transparent; background: transparent; }
+.edition-switch button[aria-pressed=true] { color: #20241f; background: #e5e5da; }
+.scene-note a, .source a, .route-photo a { color: inherit; text-underline-offset: .21em; }
+.scene-note a:hover, .source a:hover, .route-photo a:hover { color: var(--paper); }
+.photo-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+.photo-heading button { padding: 4px 7px; min-height: 32px; margin-bottom: 6px; border-color: transparent; color: var(--muted); }
+.photo-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.photo-rail button { display: grid; gap: 6px; padding: 4px; text-align: left; overflow: hidden; }
+.photo-rail button[aria-pressed=true] { border-color: #c39766; background: #30291f; }
+.photo-rail img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 3px; }
+.photo-rail span { padding-inline: 2px; font-size: .82rem; }
+.route-photo { margin: 0 0 10px; }
+.route-photo img { display: block; width: 100%; max-height: 230px; height: auto; object-fit: contain; border-radius: 6px; background: #101411; }
+.route-photo figcaption { padding-top: 6px; color: var(--muted); line-height: 1.45; font-size: .77rem; }
+.photo-pin {
+  position: relative; display: grid; gap: 1px; padding: 4px 7px; min-height: 30px;
+  white-space: nowrap; text-align: center; line-height: 1.1; font-size: .72rem; font-weight: 650;
+  background: #f2e6ce; color: #29251d; border-color: #c6ad86; border-radius: 4px; box-shadow: 0 3px 7px #0007;
+}
+.photo-pin::after { content: ""; position: absolute; top: 100%; left: calc(50% - 1px); width: 2px; height: 9px; background: #f2e6ce; }
+.photo-pin small { font-size: .61rem; font-weight: 500; }
+.photo-pin[aria-pressed=true] { background: #593e26; border-color: #ffd3a5; color: #fff3e0; }
+@media (max-width: 620px) {
+  .intro { align-items: flex-start; flex-direction: column; }
+  .edition-switch button { min-height: 41px; }
+  .photo-pin { min-height: 35px; }
+}

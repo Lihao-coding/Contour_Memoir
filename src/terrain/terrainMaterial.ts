@@ -18,6 +18,11 @@ export function terrainMaterial(detail: Texture | null, coastal: boolean, lakeLe
       profileOnly: { value: profileOnly },
       detailMap: { value: detail },
       hasDetail: { value: !!detail },
+      orthophoto: { value: null },
+      hasOrthophoto: { value: false },
+      orthophotoInset: { value: null },
+      hasInset: { value: false },
+      insetBounds: { value: [0, 0, 1, 1] },
       verticalScale: { value: 1.5 },
       trackMask: { value: null },
       showTrackMask: { value: false },
@@ -59,6 +64,11 @@ export function terrainMaterial(detail: Texture | null, coastal: boolean, lakeLe
       uniform bool profileOnly;
       uniform sampler2D detailMap;
       uniform bool hasDetail;
+      uniform sampler2D orthophoto;
+      uniform bool hasOrthophoto;
+      uniform sampler2D orthophotoInset;
+      uniform bool hasInset;
+      uniform vec4 insetBounds;
       uniform float verticalScale;
       uniform sampler2D trackMask;
       uniform bool showTrackMask;
@@ -122,6 +132,18 @@ export function terrainMaterial(detail: Texture | null, coastal: boolean, lakeLe
           water = mix(water, vec3(0.035, 0.125, 0.125), lake * 0.58);
         }
         vec3 color = mix(water, land, landWeight);
+        if (hasOrthophoto) {
+          vec4 aerial = texture2D(orthophoto, vUv);
+          vec3 photo = aerial.rgb;
+          if (hasInset) {
+            vec2 area = (vMetres - insetBounds.xy) / (insetBounds.zw - insetBounds.xy);
+            if (all(greaterThanEqual(area, vec2(0.0))) && all(lessThanEqual(area, vec2(1.0)))) {
+              vec4 inset = texture2D(orthophotoInset, vec2(area.x, 1.0 - area.y));
+              photo = mix(photo, inset.rgb, inset.a);
+            }
+          }
+          color = mix(color, photo * 1.14, aerial.a * 0.94);
+        }
         if (profileOnly) color = vec3(0.075, 0.092, 0.091) + grain.r * 0.03;
         float sunlight = 1.0;
         vec3 reflection = vec3(0.0);
@@ -154,7 +176,8 @@ export function terrainMaterial(detail: Texture | null, coastal: boolean, lakeLe
             float sheen = 0.86 + 0.23 * grain.b + 0.11 * sin(a * 0.17 + b * 0.13);
             float glint = pow(alignment, 24.0) * 0.17 + pow(alignment, 105.0) * 0.46 * sheen;
             float fresnel = pow(1.0 - clamp(view.y, 0.0, 1.0), 3.0);
-            reflection = waterWeight * (key * glint * sunlight + vec3(0.06, 0.18, 0.22) * fresnel);
+            reflection = waterWeight * (key * glint * sunlight + vec3(0.06, 0.18, 0.22) * fresnel)
+              * (hasOrthophoto ? 0.55 : 1.0);
           }
         }
         float lambert = max(dot(surfaceNormal, sun), 0.0) * sunlight;

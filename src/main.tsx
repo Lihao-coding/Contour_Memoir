@@ -1,11 +1,13 @@
 import { Canvas, useThree } from "@react-three/fiber";
-import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Component, Suspense, lazy, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { Group, RepeatWrapping, Texture, TextureLoader, Vector3 } from "three";
 import FlatToSandbox from "./atmosphere/FlatToSandbox";
 import SandboxControls from "./atmosphere/SandboxControls";
 import SunRig from "./atmosphere/SunRig";
+import { asset } from "./assets";
 import { lightingAt } from "./atmosphere/solar";
+import { aerialCredit, aerialSource, PhotoPins, PhotoRail, routePhotos, studioAsset, useOrthophoto, type PhotoStop } from "./demo/studio";
 import FieldMarker, { FocusField } from "./field/FieldMarker";
 import OfflinePack from "./field/OfflinePack";
 import { nearestRoute, onTerrain } from "./field/position";
@@ -20,7 +22,8 @@ import { trackTexture } from "./trail/trackTexture";
 import { flightSpeed, usePlayback } from "./walker/usePlayback";
 import "./styles.css";
 
-const asset = (path: string) => new URL(path, new URL(import.meta.env.BASE_URL, location.href)).href;
+const Walker = lazy(() => import("./walker/Walker"));
+type Edition = "basic" | "studio";
 const daylight = lightingAt();
 const lowLight = lightingAt({ altitude: 18, bearing: 315, moonAltitude: -20, moonBearing: 0 });
 const noAction = () => {};
@@ -102,7 +105,7 @@ function SceneInvalidator({ progress }: { progress: number }) {
 
 const initialCamera = { position: [850, 790, 1060] as [number, number, number], fov: 43, near: 4, far: 6000 };
 
-function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolean }) {
+function RouteWorkbench({ project, demo, studio }: { project: TrailProject; demo: boolean; studio: boolean }) {
   const prepared = useMemo(() => sceneData(project), [project]);
   const { data, track, profile, max, hasElevation } = prepared;
   const [compact] = useState(() => matchMedia("(max-width: 650px), (pointer: coarse)").matches);
@@ -113,8 +116,12 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
   const [expanded, setExpanded] = useState(false);
   const [flying, setFlying] = useState(false);
   const [zoom, setZoom] = useState({ steps: 0, direction: 0 });
-  const [aim, setAim] = useState<Vector3 | null>(null);
+  const [aim, setAim] = useState<{ point: Vector3; distance?: number } | null>(null);
+  const [aerial, setAerial] = useState(studio);
+  const [showWalker, setShowWalker] = useState(studio);
+  const [photo, setPhoto] = useState<PhotoStop>();
   const [detail, setDetail] = useState<Texture | null>(null);
+  const orthophoto = useOrthophoto(studio);
   const terrain = useRef<Group>(null);
   const treatment = useRef<HTMLDivElement>(null);
   const locationStatus = useLocation(project.frame);
@@ -129,6 +136,12 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
   const playback = usePlayback(track.duration_s, true);
   const distance = distanceAtTime(track, playback.elapsed);
   const progress = distance / track.distance_m;
+  const surfacePhoto = aerial ? orthophoto.layer : null;
+  const cameraScale = 1000 / mapSize;
+  const stops = useMemo(() => studio ? routePhotos.flatMap((entry) => {
+    const match = nearestRoute(entry, track);
+    return match ? [{ photo: entry, progress: match.distance / track.distance_m }] : [];
+  }) : [], [studio, track]);
   const coastal = project.terrain?.coastal === true;
   const lake = project.terrain?.lakeLevel;
   const lakeLevel = lake === undefined ? undefined : lake - (coastal ? 0 : project.terrain!.min);
@@ -176,7 +189,18 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
     if (!playback.playing) playback.toggle();
   }
 
+  function selectPhoto(stop: PhotoStop) {
+    stopFlight();
+    if (playback.playing) playback.toggle();
+    playback.seek(route.elapsedAt(stop.progress));
+    setPhoto(stop);
+    if (!flat) {
+      setAim({ point: route.getPointAt(stop.progress).multiplyScalar(cameraScale), distance: 390 });
+    }
+  }
+
   const fallback = <PlanPreview project={project} progress={playback.elapsed / track.duration_s} fallback />;
+  const cursor = <PlaybackCursor route={route} progress={progress} size={mapSize} />;
   return <section className={"workbench" + (expanded ? " is-expanded" : "")} aria-label="路线工作区">
     <div className="scene-layout">
       <div className="viewport">
@@ -184,20 +208,25 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
           <Canvas frameloop="demand" dpr={compact ? 1 : [1, 1.25]} camera={initialCamera} fallback={fallback}>
             <SunRig light={light} />
             <HeightmapTerrain data={data} exaggeration={exaggeration} detail={detail} trace={trace} light={light}
-              terrain={terrain} coastal={coastal} lakeLevel={lakeLevel} profileOnly={!project.terrain} cinematic={cinematic}
+              terrain={terrain} coastal={coastal} lakeLevel={lakeLevel} profileOnly={!project.terrain} cinematic={cinematic} orthophoto={surfacePhoto}
               animateWater={cinematic && (coastal || lakeLevel !== undefined) && !compact}>
               <TrackLine route={route} distance={track.distance_m} />
-              <PlaybackCursor route={route} progress={progress} size={mapSize} />
+              {studio && showWalker && !flat ? <SceneBoundary fallback={cursor}>
+                <Suspense fallback={cursor}>
+                  <Walker route={route} progress={progress} metres={distance} moving={playback.playing} modelUrl={studioAsset("walker.glb")} />
+                </Suspense>
+              </SceneBoundary> : cursor}
+              {studio && <PhotoPins stops={stops} route={route} selected={photo?.photo.id} onSelect={selectPhoto} />}
               {livePoint && <FieldMarker point={livePoint} data={data} exaggeration={exaggeration}
                 accuracy={fix?.accuracy} simulated={false} stale={fix?.stale ?? false} />}
             </HeightmapTerrain>
-            <SandboxControls flat={flat} autoSpin={spin && !flat && !playback.playing && !locationStatus.watching}
+            <SandboxControls flat={flat} autoSpin={spin && !flat && !playback.playing && !locationStatus.watching && !aim && !photo}
               reset={reset} focusRequest={0} zoom={zoom} data={data} exaggeration={exaggeration} terrain={terrain}
               onInput={() => { setAim(null); stopFlight(); }} />
             <FlatToSandbox flat={flat} reset={reset} terrain={terrain} treatment={treatment} onSettled={noAction} />
             <SceneInvalidator progress={progress} />
             {flying && <RouteFlight route={route} terrain={data} exaggeration={exaggeration} progress={progress} distance={track.distance_m} />}
-            <FocusField aim={aim} />
+            <FocusField aim={aim?.point ?? null} distance={aim?.distance} />
           </Canvas>
         </SceneBoundary>
         <div className="viewport-modes" role="group" aria-label="显示方式">
@@ -212,7 +241,8 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
         </div>
       </div>
       <footer className="scene-note">
-        <span>{project.terrain ? (demo ? "Copernicus DEM · 30 米" : "自定义高程网格") : hasElevation ? "GPX 轨迹高程" : "GPX 平面轨迹"}</span>
+        {surfacePhoto ? <a href={aerialSource}>{aerialCredit}</a>
+          : <span>{project.terrain ? (demo ? "Copernicus DEM · 30 米" : "自定义高程网格") : hasElevation ? "GPX 轨迹高程" : "GPX 平面轨迹"}</span>}
         <span>范围 {project.size.map((metres) => (metres / 1000).toFixed(2)).join(" × ")} 公里</span>
       </footer>
     </div>
@@ -234,6 +264,21 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
         <button className="primary" type="button" onClick={playback.toggle}>{playback.playing ? "暂停" : "播放"}</button>
         <button type="button" aria-pressed={flying} disabled={flat} onClick={toggleFlight}>沿线飞行</button>
       </div>
+      {studio && <section className="panel-section">
+        <h2>实景图层</h2>
+        <div className="view-actions">
+          <button type="button" aria-pressed={aerial && !!orthophoto.layer} disabled={!orthophoto.layer} onClick={() => setAerial(!aerial)}>高清航片</button>
+          <button type="button" aria-pressed={showWalker} disabled={flat} onClick={() => setShowWalker(!showWalker)}>徒步人物</button>
+          <button type="button" disabled={flat || !showWalker} onClick={() => {
+            stopFlight();
+            const point = route.getPointAt(progress);
+            point.y += 20;
+            setAim({ point: point.multiplyScalar(cameraScale), distance: 140 });
+          }}>聚焦人物</button>
+        </div>
+        {!orthophoto.layer && <p role="status">{orthophoto.error ? "航片暂未加载，仍可查看高程沙盘。" : "正在加载航片…"}</p>}
+      </section>}
+      {studio && <PhotoRail stops={stops} selected={photo} onSelect={selectPhoto} onClose={() => setPhoto(undefined)} />}
       <section className="panel-section">
         <h2>视图设置</h2>
         <div className="view-actions">
@@ -249,7 +294,7 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
           {livePoint && <button type="button" onClick={() => {
             stopFlight();
             const y = flat ? 0 : sampleHeight(data, livePoint.x, livePoint.z) * exaggeration;
-            setAim(new Vector3(livePoint.x, y, livePoint.z).multiplyScalar(1000 / mapSize));
+            setAim({ point: new Vector3(livePoint.x, y, livePoint.z).multiplyScalar(cameraScale) });
           }}>定位居中</button>}
         </div>
         {locationStatus.watching && <p role="status">{locationStatus.issue || (fix
@@ -267,6 +312,8 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
           <p>地形与影像来自公开数据集，不代表官方测绘数据。</p>
           <p>如涉及具体地理信息需求，请以自然资源主管部门发布的标准地图为准。</p>
           {project.terrain && <p>{project.terrain.attribution}</p>}
+          {studio && <p><a href={aerialSource}>{aerialCredit}</a>，2025 年 TDOP，已拼接、裁剪与重采样。</p>}
+          {studio && <p>照片点位关联附近的演示路段。模型为虚拟徒步者。</p>}
         </details>
         <OfflinePack />
       </section>
@@ -276,6 +323,7 @@ function RouteWorkbench({ project, demo }: { project: TrailProject; demo: boolea
 
 function App() {
   const [demo, setDemo] = useState<TrailProject | null>(null);
+  const [edition, setEdition] = useState<Edition>(() => new URLSearchParams(location.search).get("edition") === "studio" ? "studio" : "basic");
   const [custom, setCustom] = useState<TrailProject[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -284,6 +332,7 @@ function App() {
   const [importRevision, setImportRevision] = useState(0);
   const generation = useRef(0);
   const project = selected === null ? demo : custom[selected];
+  const studio = selected === null && edition === "studio";
   useEffect(() => {
     const controller = new AbortController();
     fetch(asset("demo/maclehose.trail.json"), { signal: controller.signal })
@@ -310,11 +359,21 @@ function App() {
     }
   }
 
+  function showDemo(next: Edition) {
+    const url = new URL(location.href);
+    if (next === "studio") url.searchParams.set("edition", next);
+    else url.searchParams.delete("edition");
+    history.replaceState(null, "", url);
+    setEdition(next);
+    setSelected(null);
+    setError("");
+  }
+
   return <main className="shell">
     <header className="site-top">
-      <div className="wordmark">山行纪 <span>Trail Sandbox</span></div>
+      <div className="wordmark">Contour Memoir <span>山行纪</span></div>
       <div className="header-actions">
-        {selected !== null && demo && <button type="button" onClick={() => { setSelected(null); setError(""); }}>查看示例</button>}
+        {selected !== null && demo && <button type="button" onClick={() => showDemo(edition)}>查看示例</button>}
         <label className="import-button">
           <input type="file" accept=".gpx,.json,application/gpx+xml,application/json" disabled={loading} onChange={(event) => {
             const file = event.currentTarget.files?.[0];
@@ -326,7 +385,14 @@ function App() {
       </div>
     </header>
     <div className="intro">
-      <div><h1>{project?.title ?? "路线沙盘"}</h1><p>{selected === null ? "麦理浩径示例" : "本机导入"} <span>· 支持 GPX 和 Trail JSON</span></p></div>
+      <div><h1>{project?.title ?? "路线沙盘"}</h1>
+        <p>{selected === null ? studio ? "高清航片、沿途照片与人物回放" : "西贡半岛 · 3D 地形与路线回放"
+          : "本机导入 · GPX / Trail JSON"}</p>
+      </div>
+      {selected === null && <div className="edition-switch" role="group" aria-label="麦理浩径示例版本">
+        <button type="button" aria-pressed={!studio} onClick={() => showDemo("basic")}>基础版</button>
+        <button type="button" aria-pressed={studio} onClick={() => showDemo("studio")}>进阶版</button>
+      </div>}
       {selected !== null && custom.length > 1 && <label className="segments">路线段
         <select value={selected} onChange={(event) => setSelected(Number(event.currentTarget.value))}>
           {custom.map((route, index) => <option key={index} value={index}>{route.title}</option>)}
@@ -334,7 +400,8 @@ function App() {
       </label>}
     </div>
     {error && <p className="import-error" role="alert">{error}</p>}
-    {project ? <RouteWorkbench key={selected === null ? "demo" : `${importRevision}-${selected}`} project={project} demo={selected === null} />
+    {project ? <RouteWorkbench key={selected === null ? edition : `${importRevision}-${selected}`}
+      project={project} demo={selected === null} studio={studio} />
       : <section className="empty" role="status">{demoError ? "示例加载失败，你仍可以导入本机路线。" : "正在读取麦理浩径地形…"}</section>}
   </main>;
 }
