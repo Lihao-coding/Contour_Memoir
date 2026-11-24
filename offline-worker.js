@@ -1,6 +1,6 @@
 // The build embeds the complete, versioned asset list in this worker.
-const version = "aa1084ef0fedc65c";
-const files = ["assets/index-CA1NG7Da.js","assets/index-Cg3yl6Rl.css","demo/maclehose.trail.json","demo/surface-detail.webp","index.html"];
+const version = "0cd7cac669bd05b6";
+const files = ["assets/Walker-APoVTzC9.js","assets/index-CjUtt5uP.css","assets/index-CmuF51nB.js","demo/maclehose.trail.json","demo/studio/east-dam-orthophoto.webp","demo/studio/long-ke-wan.webp","demo/studio/po-pin-chau.webp","demo/studio/sai-kung-orthophoto.webp","demo/studio/walker.glb","demo/surface-detail.webp","index.html"];
 const scope = self.registration.scope;
 const prefix = "selfspace-trail:" + scope + ":";
 const cacheName = prefix + version;
