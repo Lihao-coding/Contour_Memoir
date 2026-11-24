@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="95" height="20" viewBox="0 0 95 20" role="img" aria-label="platform Web">
+  <title>platform Web</title>
+  <defs>
+    <clipPath id="edge"><rect width="95" height="20" rx="4"/></clipPath>
+    <linearGradient id="sheen" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".16"/>
+      <stop offset=".48" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".17"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#edge)">
+    <rect width="58" height="20" fill="#4a4e4a"/>
+    <rect x="58" width="37" height="20" fill="#59655e"/>
+    <rect width="95" height="20" fill="url(#sheen)"/>
+  </g>
+  <g fill="#fff" font-family="Verdana, Geneva, sans-serif" font-size="11" text-anchor="middle">
+    <text x="29" y="14">platform</text>
+    <text x="76.5" y="14">Web</text>
+  </g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="20" viewBox="0 0 80 20" role="img" aria-label="Node.js 24">
+  <title>Node.js 24</title>
+  <defs>
+    <clipPath id="edge"><rect width="80" height="20" rx="4"/></clipPath>
+    <linearGradient id="sheen" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".16"/>
+      <stop offset=".48" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".17"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#edge)">
+    <rect width="53" height="20" fill="#4a4e4a"/>
+    <rect x="53" width="27" height="20" fill="#367847"/>
+    <rect width="80" height="20" fill="url(#sheen)"/>
+  </g>
+  <g fill="#fff" font-family="Verdana, Geneva, sans-serif" font-size="11" text-anchor="middle">
+    <text x="26.5" y="14">Node.js</text>
+    <text x="66.5" y="14">24</text>
+  </g>
+</svg>

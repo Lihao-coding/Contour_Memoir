@@ -5,11 +5,11 @@
 <p><strong>把走过的路线，留成一座可以重访的 3D 沙盘。</strong></p>
 <p>导入 GPX 或 Trail JSON，查看路线高程、切换平面和 3D，沿着轨迹重走一程。</p>
 <p>
-  <a href="package.json"><img alt="项目版本" src="https://img.shields.io/github/package-json/v/Lihao-coding/Contour_Memoir?style=plastic&amp;label=version&amp;color=236e91"></a>
-  <a href="https://lihao-coding.github.io/Contour_Memoir/"><img alt="运行平台 Web" src="https://img.shields.io/badge/platform-Web-646e69?style=plastic"></a>
-  <a href="#开发"><img alt="开发环境 Node.js 24" src="https://img.shields.io/badge/Node.js-24-377d48?style=plastic&amp;logo=nodedotjs&amp;logoColor=white"></a>
-  <a href="LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/badge/license-MIT-956932?style=plastic"></a>
-  <a href="https://lihao-coding.github.io/Contour_Memoir/?edition=studio"><img alt="打开在线演示" src="https://img.shields.io/badge/demo-online-427566?style=plastic"></a>
+  <a href="package.json"><img alt="项目版本" src="docs/badges/version.svg"></a>
+  <a href="https://lihao-coding.github.io/Contour_Memoir/"><img alt="运行平台 Web" src="docs/badges/platform.svg"></a>
+  <a href="#开发"><img alt="开发环境 Node.js 24" src="docs/badges/node.svg"></a>
+  <a href="LICENSE"><img alt="MIT 许可证" src="docs/badges/license.svg"></a>
+  <a href="https://lihao-coding.github.io/Contour_Memoir/?edition=studio"><img alt="打开在线演示" src="docs/badges/demo.svg"></a>
 </p>
 <p><a href="https://lihao-coding.github.io/Contour_Memoir/">体验基础版</a> · <a href="https://lihao-coding.github.io/Contour_Memoir/?edition=studio">体验进阶版</a> · <a href="#使用">导入路线</a></p>
 
@@ -45,6 +45,8 @@
 ## 开发
 
 需要 Node.js 24。
+
+更新项目版本时，同步修改 [版本徽章](docs/badges/version.svg)。
 
 ```sh
 npm ci
