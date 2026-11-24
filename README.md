@@ -4,7 +4,13 @@
 
 <p><strong>把走过的路线，留成一座可以重访的 3D 沙盘。</strong></p>
 <p>导入 GPX 或 Trail JSON，查看路线高程、切换平面和 3D，沿着轨迹重走一程。</p>
-<p>GPX / Trail JSON · React / Three.js · 浏览器本地处理</p>
+<p>
+  <a href="package.json"><img alt="项目版本" src="https://img.shields.io/github/package-json/v/Lihao-coding/shanxingji?style=plastic&amp;label=version&amp;color=236e91"></a>
+  <a href="https://lihao-coding.github.io/shanxingji/"><img alt="运行平台 Web" src="https://img.shields.io/badge/platform-Web-646e69?style=plastic"></a>
+  <a href="#开发"><img alt="开发环境 Node.js 24" src="https://img.shields.io/badge/Node.js-24-377d48?style=plastic&amp;logo=nodedotjs&amp;logoColor=white"></a>
+  <a href="LICENSE"><img alt="MIT 许可证" src="https://img.shields.io/badge/license-MIT-956932?style=plastic"></a>
+  <a href="https://lihao-coding.github.io/shanxingji/?edition=studio"><img alt="打开在线演示" src="https://img.shields.io/badge/demo-online-427566?style=plastic"></a>
+</p>
 <p><a href="https://lihao-coding.github.io/shanxingji/">体验基础版</a> · <a href="https://lihao-coding.github.io/shanxingji/?edition=studio">体验进阶版</a> · <a href="#使用">导入路线</a></p>
 
 </div>
@@ -78,16 +84,8 @@ python tools/add-dem.py route.trail.json dem.tif route-with-dem.trail.json \
 
 `src/project/import.ts` 提供 `parseGpx`、`importProject` 与 `sceneData`，供其他页面调用。每次导入支持最多 12 MB、50,000 个轨迹点。
 
-## 示例数据
+## 许可证与示例素材
 
-麦理浩径西贡段使用简化路线与估算时间。个人原始 GPS 文件、拍摄时间和私人照片保留在原项目。公开演示使用下列数据与照片，供地形与轨迹展示。
+项目自有源代码采用 [MIT 许可证](LICENSE)。航片、高程数据、照片及其他演示素材按各自条款使用。[查看素材许可与署名](ASSET_LICENSES.md)
 
-[Copernicus DEM 资料与许可](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM)
-
-> produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved
-
-
-- 航片 © 香港特别行政区政府地政总署，来自 [DATA.GOV.HK · 真数码正射影像图（TDOP）系列](https://data.gov.hk/en-data/dataset/hk-landsd-openmap-true-digital-orthophoto)及 [CSDI Portal](https://portal.csdi.gov.hk/csdi-webpage/)，2025 年图幅。已拼接、裁剪和重采样。[DATA.GOV.HK 使用条款](https://data.gov.hk/en/terms-and-conditions) · [CSDI 使用条款](https://portal.csdi.gov.hk/csdi-webpage/doc/TNC)
-- 浪茄湾全景由 Minghong 拍摄，已缩放并转为 WebP，仍采用 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)。[Wikimedia Commons 原图](https://commons.wikimedia.org/wiki/File:Long_Ke_Wan_2.jpg)
-- 破边洲照片由 ImMrDrake 拍摄，作者将其发布到公有领域，示例已缩放并转为 WebP。[Wikimedia Commons 原图及权利说明](https://commons.wikimedia.org/wiki/File:PoPinChau.JPG)
-- 景点地标参考 © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)，以附近的演示路段定位。徒步人物为项目自制模型。
+麦理浩径西贡段采用简化路线与估算时间，供地形与轨迹展示。个人原始 GPS 文件、拍摄时间和私人照片保留在原项目。
